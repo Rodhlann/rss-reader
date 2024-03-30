@@ -2,7 +2,7 @@ import { log } from '../util/logger';
 import path from 'node:path';
 
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(path.resolve(__dirname, 'feeds.db'), (err) => {
+const db = new sqlite3.Database(path.resolve(__dirname, 'feeds.db'), (err: Error) => {
   if (err) log.error(err.message)
 });
 
@@ -16,7 +16,7 @@ export const initializeDB = async (): Promise<void> => {
       title TEXT NOT NULL UNIQUE,
       url TEXT NOT NULL UNIQUE
     )`,
-      (err) => {
+      (err: Error) => {
         if (err) {
           log.error('DB initialization failed', err.message);
           reject(err);
@@ -34,7 +34,7 @@ export const add = async ({ title, url }: Feed): Promise<void> => {
     db.run(
       `INSERT INTO rss_feeds (title, url) VALUES (?, ?)`,
       [title, url],
-      (err) => {
+      (err: Error) => {
         if (err) {
           reject(err);
         } else {
@@ -47,7 +47,7 @@ export const add = async ({ title, url }: Feed): Promise<void> => {
 
 export const getAll = async (): Promise<Feed[]> => {
   return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM rss_feeds', (err, rows) => {
+    db.all('SELECT * FROM rss_feeds', (err: Error, rows: Feed[]) => {
       if (err) {
         reject(err);
       } else {
@@ -63,11 +63,11 @@ export const deleteByTitle = async ({
   title: Feed['title'];
 }): Promise<void> => {
   return new Promise((resolve, reject) => {
-    db.all(`DELETE FROM rss_feeds where title="${title}"`, (err, rows) => {
+    db.all(`DELETE FROM rss_feeds where title="${title}"`, (err: Error) => {
       if (err) {
         reject(err);
       } else {
-        resolve(rows);
+        resolve();
       }
     });
   });

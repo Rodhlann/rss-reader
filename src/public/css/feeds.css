@@ -1,0 +1,19 @@
+.all-feeds-wrapper {
+}
+
+.feed-wrapper {
+  margin-bottom: 10px;
+}
+
+.feed-post {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid gray;
+  border-radius: 5px;
+  padding: 5px 15px;
+  margin: 5px 0;
+}
+
+.feed-post-header {
+  margin-bottom: 5px;
+}

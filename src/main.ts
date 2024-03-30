@@ -1,6 +1,8 @@
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
+import path from 'path';
 import {
   populateCredentialCookies,
   resetSession,
@@ -25,10 +27,12 @@ const app = express();
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(compression());
+
+app.use(express.static(path.join(__dirname, '/public')));
 
 initializeDB();
 
-// app.use('/', express.static(path.join(__dirname, 'public')));
 app.get('/', async (_req, res) => {
   await setupSession(res);
   res.send(await Home());
@@ -59,7 +63,6 @@ app.post('/admin', async (req, res) => {
 });
 
 app.post('/delete', async (req, res) => {
-
   const userTokenCookie = req.cookies ? req.cookies[userToken] : '';
   const isValid = await validateUser(userTokenCookie);
   if (!isValid) {

@@ -18,7 +18,8 @@ export const addFeed = async ({ title, url }: Feed) => {
     await add({ title: trimmedTitle, url: trimmedUrl });
     log.info('Feed added:', trimmedTitle);
   } catch (e) {
-    log.error('Unable to add feed', { errorMessage: e.message });
+    if (e instanceof Error)
+      log.error('Unable to add feed', { errorMessage: e.message });
     return;
   }
 };
@@ -33,7 +34,8 @@ export const deleteFeed = async ({ title }: Omit<Feed, 'url'>) => {
     await deleteByTitle({ title });
     log.info('Feed deleted:', title);
   } catch (e) {
-    log.error('Unable to delete feed', { errorMessage: e.message });
+    if (e instanceof Error) 
+      log.error('Unable to delete feed', { errorMessage: e.message });
     return;
   }
 };

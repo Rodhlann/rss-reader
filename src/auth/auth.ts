@@ -1,7 +1,7 @@
-import FusionAuthClient from '@fusionauth/typescript-client';
+import FusionAuthClient, { JWT } from '@fusionauth/typescript-client';
 import dotenv from 'dotenv';
 import { Request, Response } from 'express';
-import { verify } from 'jsonwebtoken';
+import { JwtHeader, verify } from 'jsonwebtoken';
 import jwksClient, { RsaSigningKey } from 'jwks-rsa';
 import pkceChallenge from 'pkce-challenge';
 import { userDetails, userSession, userToken } from '../util/constants';
@@ -9,10 +9,10 @@ import { log } from '../util/logger';
 
 dotenv.config();
 
-const clientId = process.env.clientId;
-const clientSecret = process.env.clientSecret;
-const fusionAuthURL = process.env.fusionAuthURL;
-const port = process.env.port;
+const clientId = process.env.clientId || '';
+const clientSecret = process.env.clientSecret || '';
+const fusionAuthURL = process.env.fusionAuthURL || '';
+const port = process.env.port || '';
 
 export const setupSession = async (res: Response) => {
   const stateValue = Array(6)
@@ -37,7 +37,7 @@ export const resetSession = (res: Response) => {
   res.clearCookie(userDetails);
 };
 
-const getKey = async (header, callback) => {
+const getKey = async (header: JwtHeader, callback: Function) => {
   const jwks = jwksClient({
     jwksUri: `${fusionAuthURL}/.well-known/jwks.json`,
   });
@@ -46,7 +46,7 @@ const getKey = async (header, callback) => {
   callback(null, signingKey);
 };
 
-export const validateUser = async (userTokenCookie) => {
+export const validateUser = async (userTokenCookie: JWT) => {
   // Make sure the user is authenticated.
   if (!userTokenCookie || !userTokenCookie?.access_token) {
     return false;
@@ -63,12 +63,13 @@ export const validateUser = async (userTokenCookie) => {
     );
     return decodedFromJwt;
   } catch (err) {
-    log.error(err);
+    if (err instanceof Error)
+      log.error(err.message);
     return false;
   }
 };
 
-const client = new FusionAuthClient(null, fusionAuthURL);
+const client = new FusionAuthClient('', fusionAuthURL);
 export const populateCredentialCookies = async (
   req: Request,
   res: Response,

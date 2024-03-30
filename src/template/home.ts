@@ -1,20 +1,24 @@
 import { getAll } from '../db/db';
+import { Feeds } from './feeds';
 
 export const Home = async (): Promise<string> => {
   const feeds = await getAll();
-  const renderedFeeds =
-    feeds
-      .map(({ title, url }) => `<li><a href="${url}">${title}</a></li>`)
-      .join('\n') || '<li>No feeds found</li>';
 
   return `<html>
-  <h1>My Cool RSS Feeds</h1>
-  <a href="http://localhost:3000/login">Admin Login</a>
+  <body>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/home.css">
+    <link rel="stylesheet" type="text/css" href="css/feeds.css">
+  </head>
 
-  <h2>Feeds</h2>
-  <ul>
-  ${renderedFeeds}
-  </ul>
+  <div class="content-wrapper">
+    <h1>My Cool RSS Feeds</h1>
+    <a href="http://localhost:3000/login">Admin Login</a>
 
+    <h2>This Week's Feeds</h2>
+
+    ${await Feeds(feeds, false)}
+  </div>
+  </body>
   </html>`;
 };
