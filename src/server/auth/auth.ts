@@ -4,8 +4,8 @@ import { Request, Response } from 'express';
 import { JwtHeader, verify } from 'jsonwebtoken';
 import jwksClient, { RsaSigningKey } from 'jwks-rsa';
 import pkceChallenge from 'pkce-challenge';
-import { userDetails, userSession, userToken } from '../util/constants';
-import { log } from '../util/logger';
+import { userDetails, userSession, userToken } from '../../util/constants';
+import { log } from '../../util/logger';
 
 dotenv.config();
 
@@ -63,8 +63,7 @@ export const validateUser = async (userTokenCookie: JWT) => {
     );
     return decodedFromJwt;
   } catch (err) {
-    if (err instanceof Error)
-      log.error(err.message);
+    if (err instanceof Error) log.error(err.message);
     return false;
   }
 };

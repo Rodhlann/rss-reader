@@ -1,0 +1,84 @@
+const STATE = {
+  fetchFeedsLoading: false,
+  fetchFeedsError: false,
+};
+
+const filterRecentPosts = (posts) => {
+  const currentDate = new Date();
+  const lastWeekTimestamp = currentDate.setUTCDate(new Date().getUTCDate() - 7);
+
+  return posts.filter(
+    ({ pubDate }) => new Date(pubDate).getTime() > lastWeekTimestamp,
+  );
+};
+
+const createFeed = ({ title, posts }) => {
+  const recentPosts = filterRecentPosts(posts);
+
+  if (!recentPosts.length) return;
+
+  const isCollapsed = STATE[`${title}-collapsed`];
+  const defaultVisiblePostsCount = 3;
+  const canCollapse = recentPosts.length > defaultVisiblePostsCount
+  const visiblePostsCount = isCollapsed
+    ? defaultVisiblePostsCount
+    : recentPosts.length;
+
+  const htmlPosts = recentPosts.slice(0, visiblePostsCount).reduce(
+    (acc, { title, link, pubDate }) =>
+      (acc += `<div class="feed-post">
+      <a class="feed-post-header" href="${link}">${title}</a>
+      <div class="feed-post-published">
+        <label><b/>Published:</b> </label><span>${new Date(pubDate).toDateString()}</span>
+      </div>
+    </div>`),
+    '',
+  );
+
+  return `<div id="feed-wrapper">
+    <h3>${title}</h3>
+    ${htmlPosts}
+    ${ canCollapse 
+    ? `<div class="collapsable-feed ${isCollapsed ? 'collapsed' : 'expanded'}">
+        ${isCollapsed ? 'Expand' : 'Collapse'}
+      </div>` 
+    : ''}
+  </div>`;
+};
+
+const populateFeeds = (feeds) => {
+  if (!feeds) return '<div class="empty-feeds">No Feeds Found</div>';
+
+  const feedsWrapper = document.getElementById('feeds-wrapper');
+  feedsWrapper.innerHTML = '';
+
+  // Set first feed to show full contents, collapse rest
+  feeds.forEach(({ title }, idx) => (STATE[`${title}-collapsed`] = !!idx));
+
+  const htmlFeeds = feeds
+    .map((feed) => createFeed(feed))
+    .filter(Boolean)
+    .join('');
+
+  feedsWrapper.innerHTML = htmlFeeds;
+};
+
+const fetchFeeds = async () => {
+  STATE.fetchFeedsLoading = true;
+  try {
+    console.log('Fetching feeds from server');
+    fetch('http://localhost:3000/feeds')
+      .then((response) => response.json())
+      .then((feeds) => populateFeeds(feeds))
+      .catch((e) => {
+        throw e;
+      });
+  } catch (e) {
+    console.error('Error fetching feeds:', e.message);
+    STATE.fetchFeedsError = true;
+  } finally {
+    STATE.fetchFeedsLoading = false;
+  }
+};
+
+document.addEventListener('DOMContentLoaded', fetchFeeds);

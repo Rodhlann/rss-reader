@@ -8,11 +8,11 @@ import {
   resetSession,
   setupSession,
   validateUser,
-} from './auth/auth';
-import { initializeDB } from './db/db';
-import { addFeed, deleteFeed } from './service/feedService';
-import { Admin } from './template/admin';
-import { Home } from './template/home';
+} from './server/auth/auth';
+import { initializeDB } from './server/db/db';
+import { addFeed, deleteFeed, fetchFeeds } from './server/service/feedService';
+import { Admin } from './server/template/admin';
+import { Home } from './server/template/home';
 import { userSession, userToken } from './util/constants';
 import { log } from './util/logger';
 
@@ -36,6 +36,11 @@ initializeDB();
 app.get('/', async (_req, res) => {
   await setupSession(res);
   res.send(await Home());
+});
+
+app.get('/feeds', async (_req, res) => {
+  const feeds = await fetchFeeds();
+  res.json(feeds);
 });
 
 app.get('/admin', async (req, res) => {
