@@ -1,6 +1,24 @@
 const STATE = {
+  defaultVisiblePostsCount: 3,
   fetchFeedsLoading: false,
   fetchFeedsError: false,
+};
+
+const kebabCase = (string) => string.toLowerCase().replaceAll(' ', '-');
+
+const toggleFeed = (title) => {
+  const formattedTitle = kebabCase(title);
+  const recentPosts = STATE[`${kebabCase(title)}-posts`]
+  const canCollapse = recentPosts.length > STATE.defaultVisiblePostsCount;
+  const isCollapsed = STATE[`${kebabCase(title)}-collapsed`];
+  STATE[`${kebabCase(title)}-collapsed`] = !isCollapsed;
+
+  const posts = createPosts(title, recentPosts)
+  const postHtml = renderPosts(title, posts, canCollapse, !isCollapsed);
+  const feedPostWrapper = document.querySelectorAll(
+    `.feed-post-wrapper.${formattedTitle}`,
+  )[0];
+  feedPostWrapper.innerHTML = postHtml;
 };
 
 const filterRecentPosts = (posts) => {
@@ -12,19 +30,13 @@ const filterRecentPosts = (posts) => {
   );
 };
 
-const createFeed = ({ title, posts }) => {
-  const recentPosts = filterRecentPosts(posts);
-
-  if (!recentPosts.length) return;
-
-  const isCollapsed = STATE[`${title}-collapsed`];
-  const defaultVisiblePostsCount = 3;
-  const canCollapse = recentPosts.length > defaultVisiblePostsCount
+const createPosts = (title, posts) => {
+  const isCollapsed = STATE[`${kebabCase(title)}-collapsed`];
   const visiblePostsCount = isCollapsed
-    ? defaultVisiblePostsCount
-    : recentPosts.length;
+    ? STATE.defaultVisiblePostsCount
+    : posts.length;
 
-  const htmlPosts = recentPosts.slice(0, visiblePostsCount).reduce(
+  return posts.slice(0, visiblePostsCount).reduce(
     (acc, { title, link, pubDate }) =>
       (acc += `<div class="feed-post">
       <a class="feed-post-header" href="${link}">${title}</a>
@@ -34,15 +46,35 @@ const createFeed = ({ title, posts }) => {
     </div>`),
     '',
   );
+};
 
+const renderPosts = (title, htmlPosts, canCollapse, isCollapsed) => `
+  ${htmlPosts}
+  ${
+    canCollapse
+      ? `<button 
+        class="collapsable-feed ${isCollapsed ? 'collapsed' : 'expanded'}"
+        onClick="toggleFeed('${title}')"
+      >
+        ${isCollapsed ? 'Expand' : 'Collapse'}
+      </button>`
+      : ''
+  }`;
+
+const createFeed = ({ title, posts }) => {
+  const recentPosts = filterRecentPosts(posts);
+  
+  if (!recentPosts.length) return;
+  STATE[`${kebabCase(title)}-posts`] = recentPosts;
+  const canCollapse = recentPosts.length > STATE.defaultVisiblePostsCount;
+  const isCollapsed = STATE[`${kebabCase(title)}-collapsed`];
+
+  const htmlPosts = createPosts(title, recentPosts);
   return `<div id="feed-wrapper">
     <h3>${title}</h3>
-    ${htmlPosts}
-    ${ canCollapse 
-    ? `<div class="collapsable-feed ${isCollapsed ? 'collapsed' : 'expanded'}">
-        ${isCollapsed ? 'Expand' : 'Collapse'}
-      </div>` 
-    : ''}
+    <div class="feed-post-wrapper ${kebabCase(title)}">
+      ${renderPosts(title, htmlPosts, canCollapse, isCollapsed)}
+    </div>
   </div>`;
 };
 
@@ -53,7 +85,9 @@ const populateFeeds = (feeds) => {
   feedsWrapper.innerHTML = '';
 
   // Set first feed to show full contents, collapse rest
-  feeds.forEach(({ title }, idx) => (STATE[`${title}-collapsed`] = !!idx));
+  feeds.forEach(
+    ({ title }, idx) => (STATE[`${kebabCase(title)}-collapsed`] = !!idx),
+  );
 
   const htmlFeeds = feeds
     .map((feed) => createFeed(feed))

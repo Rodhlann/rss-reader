@@ -1,41 +1,23 @@
-import { XMLParser } from 'fast-xml-parser';
+import { NormalizerFactory } from '../../util/feedNormalizer';
 import { log } from '../../util/logger';
-import { validateText, validateUrl } from '../../util/validate';
-import { DBFeed, add, cacheFeeds, deleteByTitle, getAll, getCachedFeeds } from '../db/db';
 import { Feed } from '../../util/types';
-
-const normalizeFeeds = (parsedXml: Record<string, any>): Feed | undefined => {
-  try {
-    const channel = parsedXml.rss.channel;
-    const items = channel.item;
-    const posts = items.map(
-      ({
-        title,
-        link,
-        pubDate,
-      }: {
-        title: string;
-        link: string;
-        pubDate: string;
-      }) => ({ title, link, pubDate }),
-    );
-    return {
-      title: channel.title,
-      posts,
-    };
-  } catch (e) {
-    if (e instanceof Error)
-      log.error('Unable to parse RSS feed XML', { errorMessage: e.message })
-  }
-};
+import { validateText, validateUrl } from '../../util/validate';
+import {
+  DBFeed,
+  add,
+  cacheFeeds,
+  deleteByTitle,
+  getAll,
+  getCachedFeeds,
+} from '../db/db';
 
 export const fetchFeeds = async (): Promise<Feed[]> => {
   const cachedFeeds = await getCachedFeeds();
   if (cachedFeeds?.length) {
-    log.info('Resolving cached feeds')
-    return cachedFeeds
+    log.info('Resolving cached feeds');
+    return cachedFeeds;
   }
-  log.info('No cached feeds found')
+  log.info('No cached feeds found');
 
   log.info('Fetching feed data');
   const feeds = await getAll();
@@ -64,10 +46,8 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
           reader.releaseLock();
         }
 
-        const parser = new XMLParser();
-        const parsedXml = parser.parse(xmlString);
-
-        return normalizeFeeds(parsedXml);
+        const normalizer = new NormalizerFactory(xmlString);
+        return normalizer.normalize();
       }),
     )
   ).filter(Boolean) as Feed[];
