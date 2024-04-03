@@ -56,6 +56,11 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
   return parsedFeeds;
 };
 
+export const getDBFeeds = async (): Promise<DBFeed[]> => {
+  log.info('Fetching feed data');
+  return await getAll();
+}
+
 export const addFeed = async ({ title, url }: DBFeed) => {
   log.info('Adding feed:', title);
   const trimmedTitle = title.trim();

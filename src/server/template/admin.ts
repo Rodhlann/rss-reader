@@ -16,7 +16,7 @@ export const Admin = async (): Promise<string> => {
   return `<html>
   <body>
     <h1>Admin</h1>
-    <a href="http://localhost:3000/logout">Logout</a>
+    <a href="/logout">Logout</a>
 
     <h2>Add Feeds</h2>
     <form id="addForm" action="/admin" method="post">
@@ -25,6 +25,15 @@ export const Admin = async (): Promise<string> => {
       <label for="linkInput">Link</label>
       <input id="linkInput" name="link" type="text" required>
       <button type="submit">Add new feed</button>
+    </form>
+
+    <form action="/feeds/import" method="post" enctype="multipart/form-data">
+      <input type="file" name="file">
+      <button type="submit">Import Feeds</button>
+    </form>
+
+    <form action="/feeds/export">
+      <button type="submit">Export Feeds</button>
     </form>
 
     <h2>Feeds</h2>
