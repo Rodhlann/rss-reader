@@ -13,52 +13,58 @@ export const Admin = async (): Promise<string> => {
       )
       .join('\n') || '<li>No feeds found</li>';
 
-  return `<html>
+  return `<!DOCTYPE html>
+  <html lang="en">
   <body>
-    <h1>Admin</h1>
-    <a href="/logout">Logout</a>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
 
-    <h2>Add Feeds</h2>
-    <form id="addForm" action="/admin" method="post">
-      <label for="titleInput">Title</label>
-      <input id="titleInput" name="title" type="text" required>
-      <label for="linkInput">Link</label>
-      <input id="linkInput" name="link" type="text" required>
-      <button type="submit">Add new feed</button>
-    </form>
+  <h1>Admin</h1>
+  <a href="/logout">Logout</a>
 
-    <form action="/feeds/import" method="post" enctype="multipart/form-data">
-      <input type="file" name="file">
-      <button type="submit">Import Feeds</button>
-    </form>
+  <h2>Add Feeds</h2>
+  <form id="addForm" action="/admin" method="post">
+    <label for="titleInput">Title</label>
+    <input id="titleInput" name="title" type="text" required>
+    <label for="linkInput">Link</label>
+    <input id="linkInput" name="link" type="text" required>
+    <button type="submit">Add new feed</button>
+  </form>
 
-    <form action="/feeds/export">
-      <button type="submit">Export Feeds</button>
-    </form>
+  <form action="/feeds/import" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button type="submit">Import Feeds</button>
+  </form>
 
-    <h2>Feeds</h2>
-    <form id="deleteForm" action="/delete" method="post">
-      <ul>
-        ${renderedFeeds}
-      </ul>
-    </form>
+  <form action="/feeds/export">
+    <button type="submit">Export Feeds</button>
+  </form>
 
-    <script>
-      function deleteFeed(event, title) {
-        event.preventDefault();
-        
-        const deleteForm = document.getElementById("deleteForm");
+  <h2>Feeds</h2>
+  <form id="deleteForm" action="/delete" method="post">
+    <ul>
+      ${renderedFeeds}
+    </ul>
+  </form>
 
-        const hiddenDeleteInput = document.createElement('input');
-        hiddenDeleteInput.setAttribute('type', 'text');
-        hiddenDeleteInput.setAttribute('name', 'title');
-        hiddenDeleteInput.setAttribute('value', title);
-        hiddenDeleteInput.hidden = true;
-        deleteForm.appendChild(hiddenDeleteInput);
+  <script>
+    function deleteFeed(event, title) {
+      event.preventDefault();
+      
+      const deleteForm = document.getElementById("deleteForm");
 
-        deleteForm.submit();
-      }
-    </script>
+      const hiddenDeleteInput = document.createElement('input');
+      hiddenDeleteInput.setAttribute('type', 'text');
+      hiddenDeleteInput.setAttribute('name', 'title');
+      hiddenDeleteInput.setAttribute('value', title);
+      hiddenDeleteInput.hidden = true;
+      deleteForm.appendChild(hiddenDeleteInput);
+
+      deleteForm.submit();
+    }
+  </script>
   </body>
   </html>`;
 };

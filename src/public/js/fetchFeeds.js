@@ -4,7 +4,8 @@ const STATE = {
   fetchFeedsError: false,
 };
 
-const kebabCase = (string) => string.toLowerCase().replaceAll(' ', '-');
+// Spaces and periods become dashes
+const kebabCase = (string) => string.toLowerCase().replaceAll(/[ .]/g, '-');
 
 const toggleFeed = (title) => {
   const formattedTitle = kebabCase(title);
@@ -89,7 +90,7 @@ const populateFeeds = (feeds) => {
 
   // Set first feed to show full contents, collapse rest
   feeds.forEach(
-    ({ title }, idx) => (STATE[`${kebabCase(title)}-collapsed`] = !!idx),
+    ({ title }) => (STATE[`${kebabCase(title)}-collapsed`] = true),
   );
 
   const htmlFeeds = feeds
@@ -104,7 +105,7 @@ const fetchFeeds = async () => {
   STATE.fetchFeedsLoading = true;
   try {
     console.log('Fetching feeds from server');
-    fetch('http://localhost:3000/feeds')
+    fetch('/feeds')
       .then((response) => response.json())
       .then((feeds) => populateFeeds(feeds))
       .catch((e) => {

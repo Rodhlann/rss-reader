@@ -15,7 +15,7 @@ export const Home = async (): Promise<string> => {
 
   <div class="content-wrapper">
     <h1>My Cool RSS Feeds</h1>
-    <a href="http://localhost:3000/login">Admin Login</a>
+    <a href="/login">Admin Login</a>
 
     <h2>This Week's Feeds</h2>
 

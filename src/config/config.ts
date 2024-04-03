@@ -9,7 +9,7 @@ const clientId = process.env.clientId;
 const clientSecret = process.env.clientSecret;
 const fusionAuthURL = process.env.fusionAuthURL;
 const port = process.env.port;
-const appUrl = process.env.appUrl || 'http://localhost' + port;
+const appUrl = process.env.appUrl || `http://localhost:${port}`;
 
 export default {
   clientId,

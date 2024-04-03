@@ -13,7 +13,7 @@ export const registerAuthRoutes = (app: Express): void => {
     }
     res.redirect(
       302,
-      `${config.fusionAuthURL}/oauth2/authorize?client_id=${config.clientId}&response_type=code&redirect_uri=http://localhost:${config.port}/oauth-redirect&state=${userSessionCookie?.stateValue}&code_challenge=${userSessionCookie?.challenge}&code_challenge_method=S256`,
+      `${config.fusionAuthURL}/oauth2/authorize?client_id=${config.clientId}&response_type=code&redirect_uri=${config.appUrl}/oauth-redirect&state=${userSessionCookie?.stateValue}&code_challenge=${userSessionCookie?.challenge}&code_challenge_method=S256`,
     );
   });
 
