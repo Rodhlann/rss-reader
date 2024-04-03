@@ -1,5 +1,4 @@
 import { getAll } from '../db/db';
-import { Feeds } from './feeds';
 
 export const Home = async (): Promise<string> => {
   const feeds = await getAll();
@@ -10,8 +9,8 @@ export const Home = async (): Promise<string> => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/css/home.css">
-    <link rel="stylesheet" type="text/css" href="/css/feeds.css">
+    <link rel="stylesheet" type="text/css" href="css/home.css">
+    <link rel="stylesheet" type="text/css" href="css/feeds.css">
   </head>
 
   <div class="content-wrapper">
@@ -25,7 +24,7 @@ export const Home = async (): Promise<string> => {
     </div>
   </div>
 
-  <script src="/js/fetchFeeds.js"></script>
+  <script src="js/fetchFeeds.js"></script>
   </body>
   </html>`;
 };

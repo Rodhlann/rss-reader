@@ -79,10 +79,13 @@ const createFeed = ({ title, posts }) => {
 };
 
 const populateFeeds = (feeds) => {
-  if (!feeds) return '<div class="empty-feeds">No Feeds Found</div>';
-
   const feedsWrapper = document.getElementById('feeds-wrapper');
   feedsWrapper.innerHTML = '';
+
+  if (!feeds?.length) {
+    feedsWrapper.innerHTML = '<div class="empty-feeds">No Feeds Found</div>';
+    return;
+  }
 
   // Set first feed to show full contents, collapse rest
   feeds.forEach(
