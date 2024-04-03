@@ -2,18 +2,18 @@ import { Express } from 'express';
 import multer from 'multer';
 import fs from 'node:fs';
 import path from 'path';
-import { userToken } from '../../util/constants';
 import { log } from '../../util/logger';
 import { validateUser } from '../auth/auth';
 import { DBFeed } from '../db/db';
 import { addFeed, deleteFeed, getDBFeeds } from '../service/feedService';
 import { Admin } from '../template/admin';
+import config from '../../config/config';
 
 const upload = multer({ dest: 'uploads/' });
 
 export const registerAdminRoutes = (app: Express): void => {
   app.get('/feeds/export', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[userToken] : '';
+    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
     const isValid = await validateUser(userTokenCookie);
     if (!isValid) {
       log.warn('UNAUTHORIZED: Attempt to perform admin task failed');
@@ -57,7 +57,7 @@ export const registerAdminRoutes = (app: Express): void => {
   });
 
   app.post('/feeds/import', upload.single('file'), async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[userToken] : '';
+    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
     const isValid = await validateUser(userTokenCookie);
     if (!isValid) {
       log.warn('UNAUTHORIZED: Attempt to perform admin task failed');
@@ -91,7 +91,7 @@ export const registerAdminRoutes = (app: Express): void => {
   });
 
   app.get('/admin', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[userToken] : '';
+    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
     const isValid = await validateUser(userTokenCookie);
     if (!isValid) {
       log.warn('UNAUTHORIZED: Attempt to reach admin page failed');
@@ -102,7 +102,7 @@ export const registerAdminRoutes = (app: Express): void => {
   });
 
   app.post('/admin', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[userToken] : '';
+    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
     const isValid = await validateUser(userTokenCookie);
     if (!isValid) {
       log.warn('UNAUTHORIZED: Attempt to add feed failed');
@@ -115,7 +115,7 @@ export const registerAdminRoutes = (app: Express): void => {
   });
 
   app.post('/delete', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[userToken] : '';
+    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
     const isValid = await validateUser(userTokenCookie);
     if (!isValid) {
       log.warn('UNAUTHORIZED: Attempt to delete feed failed');

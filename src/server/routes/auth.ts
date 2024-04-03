@@ -1,15 +1,11 @@
 import { Express } from 'express';
-import { userSession } from '../../util/constants';
+import config from '../../config/config';
 import { log } from '../../util/logger';
 import { populateCredentialCookies, resetSession } from '../auth/auth';
 
-const clientId = process.env.clientId;
-const fusionAuthURL = process.env.fusionAuthURL;
-const port = process.env.port;
-
 export const registerAuthRoutes = (app: Express): void => {
   app.get('/login', async (req, res) => {
-    const userSessionCookie = req.cookies[userSession];
+    const userSessionCookie = req.cookies[config.userSession];
     // Cookie was cleared, just send back (hacky way)
     if (!userSessionCookie?.stateValue || !userSessionCookie?.challenge) {
       res.redirect(302, '/');
@@ -17,7 +13,7 @@ export const registerAuthRoutes = (app: Express): void => {
     }
     res.redirect(
       302,
-      `${fusionAuthURL}/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=http://localhost:${port}/oauth-redirect&state=${userSessionCookie?.stateValue}&code_challenge=${userSessionCookie?.challenge}&code_challenge_method=S256`,
+      `${config.fusionAuthURL}/oauth2/authorize?client_id=${config.clientId}&response_type=code&redirect_uri=http://localhost:${config.port}/oauth-redirect&state=${userSessionCookie?.stateValue}&code_challenge=${userSessionCookie?.challenge}&code_challenge_method=S256`,
     );
   });
 
@@ -38,7 +34,10 @@ export const registerAuthRoutes = (app: Express): void => {
   });
 
   app.get('/logout', (_req, res) => {
-    res.redirect(302, `${fusionAuthURL}/oauth2/logout?client_id=${clientId}`);
+    res.redirect(
+      302,
+      `${config.fusionAuthURL}/oauth2/logout?client_id=${config.clientId}`,
+    );
   });
 
   app.get('/oauth2/logout', (_req, res) => {

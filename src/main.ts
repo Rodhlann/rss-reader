@@ -1,15 +1,11 @@
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
 import { initializeDB } from './server/db/db';
 import { registerRoutes } from './server/routes';
 import { log } from './util/logger';
-
-dotenv.config();
-
-const port = process.env.port;
+import config from './config/config';
 
 const app = express();
 
@@ -23,6 +19,6 @@ app.use(express.static(path.join(__dirname, '/public')));
 initializeDB();
 registerRoutes(app);
 
-app.listen(port, () => {
-  return log.info(`Express is listening at http://localhost:${port}`);
+app.listen(config.port, () => {
+  return log.info(`Express is listening at port: ${config.port}`);
 });

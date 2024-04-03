@@ -4,15 +4,10 @@ import { Request, Response } from 'express';
 import { JwtHeader, verify } from 'jsonwebtoken';
 import jwksClient, { RsaSigningKey } from 'jwks-rsa';
 import pkceChallenge from 'pkce-challenge';
-import { userDetails, userSession, userToken } from '../../util/constants';
 import { log } from '../../util/logger';
+import config from '../../config/config';
 
 dotenv.config();
-
-const clientId = process.env.clientId || '';
-const clientSecret = process.env.clientSecret || '';
-const fusionAuthURL = process.env.fusionAuthURL || '';
-const port = process.env.port || '';
 
 export const setupSession = async (res: Response) => {
   const stateValue = Array(6)
@@ -20,7 +15,7 @@ export const setupSession = async (res: Response) => {
     .reduce((acc, next) => (acc += next));
   const pkcePair = await pkceChallenge();
   res.cookie(
-    userSession,
+    config.userSession,
     {
       stateValue,
       verifier: pkcePair.code_verifier,
@@ -32,14 +27,14 @@ export const setupSession = async (res: Response) => {
 
 export const resetSession = (res: Response) => {
   log.info('Logging out...');
-  res.clearCookie(userSession);
-  res.clearCookie(userToken);
-  res.clearCookie(userDetails);
+  res.clearCookie(config.userSession);
+  res.clearCookie(config.userToken);
+  res.clearCookie(config.userDetails);
 };
 
 const getKey = async (header: JwtHeader, callback: Function) => {
   const jwks = jwksClient({
-    jwksUri: `${fusionAuthURL}/.well-known/jwks.json`,
+    jwksUri: `${config.fusionAuthURL}/.well-known/jwks.json`,
   });
   const key = (await jwks.getSigningKey(header.kid)) as RsaSigningKey;
   var signingKey = key?.getPublicKey() || key?.rsaPublicKey;
@@ -68,7 +63,7 @@ export const validateUser = async (userTokenCookie: JWT) => {
   }
 };
 
-const client = new FusionAuthClient('', fusionAuthURL);
+const client = new FusionAuthClient('', config.fusionAuthURL!);
 export const populateCredentialCookies = async (
   req: Request,
   res: Response,
@@ -76,7 +71,7 @@ export const populateCredentialCookies = async (
   const stateFromFusionAuth = `${req.query?.state}`;
   const authCode = `${req.query?.code}`;
 
-  const userSessionCookie = req.cookies[userSession];
+  const userSessionCookie = req.cookies[config.userSession];
   if (stateFromFusionAuth !== userSessionCookie?.stateValue) {
     throw new Error(
       "State doesn't match. Saw: " +
@@ -90,9 +85,9 @@ export const populateCredentialCookies = async (
   const accessToken = (
     await client.exchangeOAuthCodeForAccessTokenUsingPKCE(
       authCode,
-      clientId,
-      clientSecret,
-      `http://localhost:${port}/oauth-redirect`,
+      config.clientId!,
+      config.clientSecret!,
+      `${config.appUrl}/oauth-redirect`,
       userSessionCookie.verifier,
     )
   ).response;
@@ -101,7 +96,7 @@ export const populateCredentialCookies = async (
     throw new Error('Failed to get Access Token');
   }
 
-  res.cookie(userToken, accessToken, { httpOnly: true });
+  res.cookie(config.userToken, accessToken, { httpOnly: true });
 
   const userResponse = (
     await client.retrieveUserUsingJWT(accessToken.access_token)
@@ -110,5 +105,5 @@ export const populateCredentialCookies = async (
     throw new Error('Failed to get User from access token, redirecting home.');
   }
 
-  res.cookie(userDetails, userResponse.user);
+  res.cookie(config.userDetails, userResponse.user);
 };
