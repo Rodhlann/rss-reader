@@ -4,9 +4,9 @@ import { Home } from '../template/home';
 import { fetchFeeds } from '../service/feedService';
 
 export const registerPublicRoutes = (app: Express): void => {
-  app.get('/', async (_req, res) => {
+  app.get('/rss-feeds', async (_req, res) => {
     await setupSession(res);
-    res.send(await Home());
+    res.send(Home());
   });
   
   app.get('/feeds', async (_req, res) => {

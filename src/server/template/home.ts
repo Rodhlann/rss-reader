@@ -1,8 +1,4 @@
-import { getAll } from '../db/db';
-
-export const Home = async (): Promise<string> => {
-  const feeds = await getAll();
-
+export const Home = (): string => {
   return `<!DOCTYPE html>
   <html lang="en">
   <body>
