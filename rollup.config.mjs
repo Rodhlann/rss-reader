@@ -7,6 +7,7 @@ import typescript from 'rollup-plugin-typescript2';
 export default {
   input: './src/main.ts',
   output: {
+    sourcemap: true,
     file: './build/bundle.js',
     format: 'cjs',
   },
@@ -21,7 +22,8 @@ export default {
     copy({
       targets: [
         { src: 'src/public/css/**/*', dest: 'build/public/css' },
-        { src: 'src/public/js/**/*', dest: 'build/public/js' }
+        { src: 'src/public/js/**/*', dest: 'build/public/js' },
+        { src: 'src/public/index.html', dest: 'build/public' }
       ],
     }),
   ],
