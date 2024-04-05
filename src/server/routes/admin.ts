@@ -3,24 +3,15 @@ import multer from 'multer';
 import fs from 'node:fs';
 import path from 'path';
 import { log } from '../../util/logger';
-import { validateUser } from '../auth/auth';
 import { DBFeed } from '../db/db';
 import { addFeed, deleteFeed, getDBFeeds } from '../service/feedService';
 import { Admin } from '../template/admin';
-import config from '../../config/config';
+import { requiresAuth } from 'express-openid-connect';
 
 const upload = multer({ dest: 'uploads/' });
 
 export const registerAdminRoutes = (app: Express): void => {
-  app.get('/feeds/export', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
-    const isValid = await validateUser(userTokenCookie);
-    if (!isValid) {
-      log.warn('UNAUTHORIZED: Attempt to perform admin task failed');
-      res.redirect(302, '/');
-      return;
-    }
-
+  app.get('/feeds/export', requiresAuth(), async (_req, res) => {
     try {
       log.info('Processing DB feeds for export');
       const feeds = await getDBFeeds();
@@ -56,15 +47,7 @@ export const registerAdminRoutes = (app: Express): void => {
     }
   });
 
-  app.post('/feeds/import', upload.single('file'), async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
-    const isValid = await validateUser(userTokenCookie);
-    if (!isValid) {
-      log.warn('UNAUTHORIZED: Attempt to perform admin task failed');
-      res.redirect(302, '/');
-      return;
-    }
-
+  app.post('/feeds/import', requiresAuth(), upload.single('file'), async (req, res) => {
     try {
       log.info('Processing feeds import file');
 
@@ -90,38 +73,17 @@ export const registerAdminRoutes = (app: Express): void => {
     }
   });
 
-  app.get('/admin', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
-    const isValid = await validateUser(userTokenCookie);
-    if (!isValid) {
-      log.warn('UNAUTHORIZED: Attempt to reach admin page failed');
-      res.redirect(302, '/');
-      return;
-    }
+  app.get('/admin', requiresAuth(), async (req, res) => {
     res.send(await Admin());
   });
 
-  app.post('/admin', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
-    const isValid = await validateUser(userTokenCookie);
-    if (!isValid) {
-      log.warn('UNAUTHORIZED: Attempt to add feed failed');
-      res.redirect(302, '/');
-      return;
-    }
+  app.post('/admin', requiresAuth(), async (req, res) => {
     const { title, link } = req.body;
     await addFeed({ title, url: link });
     res.send(await Admin());
   });
 
-  app.post('/delete', async (req, res) => {
-    const userTokenCookie = req.cookies ? req.cookies[config.userToken] : '';
-    const isValid = await validateUser(userTokenCookie);
-    if (!isValid) {
-      log.warn('UNAUTHORIZED: Attempt to delete feed failed');
-      res.redirect(302, '/');
-      return;
-    }
+  app.post('/delete', requiresAuth(), async (req, res) => {
     const { title } = req.body;
     deleteFeed({ title });
     res.redirect(302, '/admin');

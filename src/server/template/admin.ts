@@ -23,6 +23,7 @@ export const Admin = async (): Promise<string> => {
 
   <h1>Admin</h1>
   <a href="/logout">Logout</a>
+  <a href="/">Home</a>
 
   <h2>Add Feeds</h2>
   <form id="addForm" action="/admin" method="post">

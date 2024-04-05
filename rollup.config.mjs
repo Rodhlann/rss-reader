@@ -23,7 +23,6 @@ export default {
       targets: [
         { src: 'src/public/css/**/*', dest: 'build/public/css' },
         { src: 'src/public/js/**/*', dest: 'build/public/js' },
-        { src: 'src/public/index.html', dest: 'build/public' }
       ],
     }),
   ],

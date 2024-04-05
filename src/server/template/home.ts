@@ -11,7 +11,7 @@ export const Home = (): string => {
 
   <div class="content-wrapper">
     <h1>My Cool RSS Feeds</h1>
-    <a href="/login">Admin Login</a>
+    <a href="/admin">Admin Login</a>
 
     <h2>This Week's Feeds</h2>
 
