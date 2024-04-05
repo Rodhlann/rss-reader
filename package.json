@@ -2,7 +2,7 @@
   "name": "rss-reader",
   "version": "0.0.1",
   "scripts": {
-    "start": "npx tsx ./src/main.ts",
+    "start": "node build/bundle.js",
     "watch": "npx tsx watch ./src/main.ts",
     "build": "rimraf ./build; rollup --config rollup.config.mjs"
   },
