@@ -1,7 +1,7 @@
-import { getAll } from '../db/db';
+import { datasource } from '../db/datasource';
 
 export const Admin = async (): Promise<string> => {
-  const feeds = await getAll();
+  const feeds = await datasource.getAll();
   const renderedFeeds =
     feeds
       .map(

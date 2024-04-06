@@ -1,12 +1,12 @@
 import { Express } from 'express';
+import { requiresAuth } from 'express-openid-connect';
 import multer from 'multer';
 import fs from 'node:fs';
 import path from 'path';
 import { log } from '../../util/logger';
-import { DBFeed } from '../db/db';
+import { DBFeed } from '../db/cache';
 import { addFeed, deleteFeed, getDBFeeds } from '../service/feedService';
 import { Admin } from '../template/admin';
-import { requiresAuth } from 'express-openid-connect';
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -47,31 +47,36 @@ export const registerAdminRoutes = (app: Express): void => {
     }
   });
 
-  app.post('/feeds/import', requiresAuth(), upload.single('file'), async (req, res) => {
-    try {
-      log.info('Processing feeds import file');
+  app.post(
+    '/feeds/import',
+    requiresAuth(),
+    upload.single('file'),
+    async (req, res) => {
+      try {
+        log.info('Processing feeds import file');
 
-      const file = req?.file;
-      if (!file) throw new Error('No file uploaded');
+        const file = req?.file;
+        if (!file) throw new Error('No file uploaded');
 
-      const data = fs.readFileSync(file.path, 'utf-8');
-      const feeds = JSON.parse(data) as DBFeed[];
+        const data = fs.readFileSync(file.path, 'utf-8');
+        const feeds = JSON.parse(data) as DBFeed[];
 
-      log.info('Storing feeds', { count: feeds.length });
-      for (const feed of feeds) {
-        await addFeed(feed);
+        log.info('Storing feeds', { count: feeds.length });
+        for (const feed of feeds) {
+          await addFeed(feed);
+        }
+
+        log.info('Deleting temp feeds import file');
+        fs.rmSync(file.path);
+      } catch (e) {
+        if (e instanceof Error)
+          log.error('Import Failed', { errorMessage: e.message });
+      } finally {
+        res.redirect(302, '/admin');
+        return;
       }
-
-      log.info('Deleting temp feeds import file');
-      fs.rmSync(file.path);
-    } catch (e) {
-      if (e instanceof Error)
-        log.error('Import Failed', { errorMessage: e.message });
-    } finally {
-      res.redirect(302, '/admin');
-      return;
-    }
-  });
+    },
+  );
 
   app.get('/admin', requiresAuth(), async (req, res) => {
     res.send(await Admin());

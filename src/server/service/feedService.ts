@@ -2,14 +2,8 @@ import { NormalizerFactory } from '../../util/feedNormalizer';
 import { log } from '../../util/logger';
 import { Feed } from '../../util/types';
 import { validateText, validateUrl } from '../../util/validate';
-import {
-  DBFeed,
-  add,
-  cacheFeeds,
-  deleteByTitle,
-  getAll,
-  getCachedFeeds,
-} from '../db/db';
+import { cacheFeeds, getCachedFeeds } from '../db/cache';
+import { DBFeed, datasource } from '../db/datasource';
 
 export const fetchFeeds = async (): Promise<Feed[]> => {
   const cachedFeeds = await getCachedFeeds();
@@ -20,7 +14,7 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
   log.info('No cached feeds found');
 
   log.info('Fetching feed data');
-  const feeds = await getAll();
+  const feeds = await datasource.getAll();
 
   const promises = feeds.map(({ url }) => fetch(url));
   const resolved = await Promise.all(promises);
@@ -58,8 +52,8 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
 
 export const getDBFeeds = async (): Promise<DBFeed[]> => {
   log.info('Fetching feed data');
-  return await getAll();
-}
+  return await datasource.getAll();
+};
 
 export const addFeed = async ({ title, url }: DBFeed) => {
   log.info('Adding feed:', title);
@@ -74,7 +68,7 @@ export const addFeed = async ({ title, url }: DBFeed) => {
     return;
   }
   try {
-    await add({ title: trimmedTitle, url: trimmedUrl });
+    await datasource.add({ title: trimmedTitle, url: trimmedUrl });
   } catch (e) {
     if (e instanceof Error)
       log.error('Unable to add feed', { errorMessage: e.message });
@@ -89,7 +83,7 @@ export const deleteFeed = async ({ title }: Omit<DBFeed, 'url'>) => {
     return;
   }
   try {
-    await deleteByTitle({ title });
+    await datasource.deleteByTitle({ title });
   } catch (e) {
     if (e instanceof Error)
       log.error('Unable to delete feed', { errorMessage: e.message });
