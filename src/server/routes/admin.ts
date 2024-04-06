@@ -4,9 +4,9 @@ import multer from 'multer';
 import fs from 'node:fs';
 import path from 'path';
 import { log } from '../../util/logger';
-import { DBFeed } from '../db/cache';
 import { addFeed, deleteFeed, getDBFeeds } from '../service/feedService';
 import { Admin } from '../template/admin';
+import { DBFeed } from '../db/datasource';
 
 const upload = multer({ dest: 'uploads/' });
 
