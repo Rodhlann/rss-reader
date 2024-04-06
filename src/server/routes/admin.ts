@@ -84,8 +84,13 @@ export const registerAdminRoutes = (app: Express): void => {
 
   app.post('/admin', requiresAuth(), async (req, res) => {
     const { title, link } = req.body;
-    await addFeed({ title, url: link });
-    res.send(await Admin());
+    try {
+      await addFeed({ title, url: link });
+      res.send(await Admin());
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Unknown Error'
+      res.status(500).send(`Unable to add feed: ${message}`);
+    }
   });
 
   app.post('/delete', requiresAuth(), async (req, res) => {

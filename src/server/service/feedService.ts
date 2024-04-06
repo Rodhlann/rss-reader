@@ -59,21 +59,13 @@ export const addFeed = async ({ title, url }: DBFeed) => {
   log.info('Adding feed:', title);
   const trimmedTitle = title.trim();
   const trimmedUrl = url.trim();
-  if (!validateText(trimmedTitle)) {
-    log.error('Invalid title string provided');
-    return;
-  }
-  if (!validateUrl(trimmedUrl)) {
-    log.error('Invalid URL string provided');
-    return;
-  }
-  try {
-    await datasource.add({ title: trimmedTitle, url: trimmedUrl });
-  } catch (e) {
-    if (e instanceof Error)
-      log.error('Unable to add feed', { errorMessage: e.message });
-    return;
-  }
+
+  if (!validateText(trimmedTitle))
+    throw new Error('Invalid title string provided');
+  if (!validateUrl(trimmedUrl))
+    throw new Error('Invalid URL string provided');
+
+  await datasource.add({ title: trimmedTitle, url: trimmedUrl });
 };
 
 export const deleteFeed = async ({ title }: Omit<DBFeed, 'url'>) => {
