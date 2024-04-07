@@ -4,10 +4,10 @@ import { cacheReset } from './cache';
 import { PostgresDatasource } from './postgres';
 import { SqliteDatasource } from './sqlite';
 
-export type DBFeed = { title: string; url: string };
+export type DBFeed = { title: string; url: string, category: string };
 
 export interface Datasource {
-  add({ title, url }: DBFeed): Promise<void>;
+  add({ title, url, category }: DBFeed): Promise<void>;
   getAll(): Promise<DBFeed[]>;
   deleteByTitle({ title }: { title: DBFeed['title'] }): Promise<void>;
 }
@@ -26,9 +26,9 @@ class SQLDatasource implements Datasource {
     }
   }
 
-  add = async ({ title, url }: DBFeed): Promise<void> => {
+  add = async ({ title, url, category }: DBFeed): Promise<void> => {
     try {
-      await this.client.add({ title, url });
+      await this.client.add({ title, url, category });
       log.info('Feed added:', title);
       await cacheReset();
     } catch (e) {

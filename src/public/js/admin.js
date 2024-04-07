@@ -4,13 +4,14 @@ const addFeed = async (event) => {
   const form = event.target.form;
   const title = form.title.value;
   const link = form.link.value;
+  const category = form.category.value;
 
   const response = await fetch('/admin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ title, link }),
+    body: JSON.stringify({ title, link, category }),
   });
 
   if (response.status == 500) {
@@ -49,6 +50,7 @@ const importFeeds = async (event) => {
     const importError = document.getElementById('import-error');
     importError.innerHTML = '[ERROR] ' + text;
     importError.hidden = false;
-    return;
+  } else {
+    window.location.reload();
   }
 };

@@ -82,9 +82,9 @@ export const registerAdminRoutes = (app: Express): void => {
   });
 
   app.post('/admin', requiresAuth(), async (req, res) => {
-    const { title, link } = req.body;
+    const { title, link, category } = req.body;
     try {
-      await addFeed({ title, url: link });
+      await addFeed({ title, url: link, category });
       res.send(await Admin());
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Unknown Error';

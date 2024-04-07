@@ -21,7 +21,7 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
 
   const parsedFeeds = (
     await Promise.all(
-      resolved.map(async (res) => {
+      resolved.map(async (res, idx) => {
         const reader = res.body?.getReader();
         const decoder = new TextDecoder('utf-8');
         if (!reader) return;
@@ -41,7 +41,7 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
         }
 
         const normalizer = new NormalizerFactory(xmlString);
-        return normalizer.normalize();
+        return normalizer.normalize(feeds[idx].title);
       }),
     )
   ).filter(Boolean) as Feed[];
@@ -55,7 +55,7 @@ export const getDBFeeds = async (): Promise<DBFeed[]> => {
   return await datasource.getAll();
 };
 
-export const addFeed = async ({ title, url }: DBFeed) => {
+export const addFeed = async ({ title, url, category }: DBFeed) => {
   log.info('Adding feed:', title);
   const trimmedTitle = title.trim();
   const trimmedUrl = url.trim();
@@ -71,10 +71,10 @@ export const addFeed = async ({ title, url }: DBFeed) => {
     throw new Error(error);
   }
 
-  await datasource.add({ title: trimmedTitle, url: trimmedUrl });
+  await datasource.add({ title: trimmedTitle, url: trimmedUrl, category });
 };
 
-export const deleteFeed = async ({ title }: Omit<DBFeed, 'url'>) => {
+export const deleteFeed = async ({ title }: Pick<DBFeed, 'title'>) => {
   log.info('Deleting feed:', title);
   if (!validateText(title)) {
     log.error('Invalid title string provided');

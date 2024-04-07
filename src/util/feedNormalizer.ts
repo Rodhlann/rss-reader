@@ -27,7 +27,7 @@ type AtomFeed = {
 };
 
 interface FeedNormalizer {
-  normalize(): Feed | undefined;
+  normalize(dbTitle: string): Feed | undefined;
 }
 
 class RSSFeedNormalizer implements FeedNormalizer {
@@ -37,7 +37,7 @@ class RSSFeedNormalizer implements FeedNormalizer {
     this.parsedXml = parsedXml;
   }
 
-  normalize(): Feed | undefined {
+  normalize(dbTitle: string): Feed | undefined {
     try {
       const channel = this.parsedXml.rss.channel;
       const items = channel.item;
@@ -61,7 +61,7 @@ class RSSFeedNormalizer implements FeedNormalizer {
         },
       );
       return {
-        title: channel.title,
+        title: dbTitle,
         posts,
       };
     } catch (e) {
@@ -78,7 +78,7 @@ class AtomFeedNormalizer implements FeedNormalizer {
     this.parsedXml = parsedXml;
   }
 
-  normalize(): Feed | undefined {
+  normalize(dbTitle: string): Feed | undefined {
     try {
       const feed = this.parsedXml.feed;
       const entries = feed.entry;
@@ -90,7 +90,7 @@ class AtomFeedNormalizer implements FeedNormalizer {
         }),
       );
       return {
-        title: feed.title,
+        title: dbTitle,
         posts,
       };
     } catch (e) {
@@ -116,7 +116,7 @@ export class NormalizerFactory {
     }
   }
 
-  normalize() {
-    return this.normalizer?.normalize();
+  normalize(dbTitle: string) {
+    return this.normalizer?.normalize(dbTitle);
   }
 }

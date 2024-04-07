@@ -4,17 +4,31 @@ const STATE = {
   fetchFeedsError: false,
 };
 
+const selectCategory = (input) => {
+  switch (input) {
+    case 'code':
+      console.log('code');
+      break;
+    case 'tech':
+      break;
+    case 'ocean':
+      break;
+    case 'all':
+    default:
+  }
+};
+
 // Spaces and periods become dashes
 const kebabCase = (string) => string.toLowerCase().replaceAll(/[ .]/g, '-');
 
 const toggleFeed = (title) => {
   const formattedTitle = kebabCase(title);
-  const recentPosts = STATE[`${kebabCase(title)}-posts`]
+  const recentPosts = STATE[`${kebabCase(title)}-posts`];
   const canCollapse = recentPosts.length > STATE.defaultVisiblePostsCount;
   const isCollapsed = STATE[`${kebabCase(title)}-collapsed`];
   STATE[`${kebabCase(title)}-collapsed`] = !isCollapsed;
 
-  const posts = createPosts(title, recentPosts)
+  const posts = createPosts(title, recentPosts);
   const postHtml = renderPosts(title, posts, canCollapse, !isCollapsed);
   const feedPostWrapper = document.querySelectorAll(
     `.feed-post-wrapper.${formattedTitle}`,
@@ -57,14 +71,14 @@ const renderPosts = (title, htmlPosts, canCollapse, isCollapsed) => `
         class="collapsable-feed ${isCollapsed ? 'collapsed' : 'expanded'}"
         onClick="toggleFeed('${title}')"
       >
-        ${isCollapsed ? 'Expand' : 'Collapse'}
+        ${isCollapsed ? 'Show more' : 'Show less'}
       </button>`
       : ''
   }`;
 
 const createFeed = ({ title, posts }) => {
   const recentPosts = filterRecentPosts(posts);
-  
+
   if (!recentPosts.length) return;
   STATE[`${kebabCase(title)}-posts`] = recentPosts;
   const canCollapse = recentPosts.length > STATE.defaultVisiblePostsCount;
@@ -89,9 +103,7 @@ const populateFeeds = (feeds) => {
   }
 
   // Set first feed to show full contents, collapse rest
-  feeds.forEach(
-    ({ title }) => (STATE[`${kebabCase(title)}-collapsed`] = true),
-  );
+  feeds.forEach(({ title }) => (STATE[`${kebabCase(title)}-collapsed`] = true));
 
   const htmlFeeds = feeds
     .map((feed) => createFeed(feed))

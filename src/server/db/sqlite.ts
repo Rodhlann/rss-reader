@@ -19,7 +19,8 @@ export class SqliteDatasource implements Datasource {
       `CREATE TABLE IF NOT EXISTS rss_feeds (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL UNIQUE,
-      url TEXT NOT NULL UNIQUE
+      url TEXT NOT NULL UNIQUE,
+      category TEXT CHECK(category IN ('code', 'tech', 'ocean')) NOT NULL
     )`,
       (err: Error) => {
         if (err) {
@@ -32,11 +33,11 @@ export class SqliteDatasource implements Datasource {
     );
   }
 
-  add = async ({ title, url }: DBFeed): Promise<void> => {
+  add = async ({ title, url, category}: DBFeed): Promise<void> => {
     return new Promise((resolve, reject) => {
       this.db.run(
-        `INSERT INTO rss_feeds (title, url) VALUES (?, ?)`,
-        [title, url],
+        `INSERT INTO rss_feeds (title, url, category) VALUES (?, ?, ?)`,
+        [title, url, category],
         async (err: Error) => {
           if (err) {
             reject(err);

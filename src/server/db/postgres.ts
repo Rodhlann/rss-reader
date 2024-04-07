@@ -25,6 +25,7 @@ export class PostgresDatasource implements Datasource {
           id SERIAL PRIMARY KEY,
           title TEXT NOT NULL UNIQUE,
           url TEXT NOT NULL UNIQUE
+          category ENUM('code', 'tech', 'ocean') NOT NULL
         )`,
           )
           .then(() => {
@@ -41,10 +42,11 @@ export class PostgresDatasource implements Datasource {
       });
   }
 
-  add = async ({ title, url }: DBFeed): Promise<void> => {
-    await this.db.query(`INSERT INTO rss_feeds (title, url) VALUES ($1, $2)`, [
+  add = async ({ title, url, category }: DBFeed): Promise<void> => {
+    await this.db.query(`INSERT INTO rss_feeds (title, url, category) VALUES ($1, $2, $3)`, [
       title,
       url,
+      category
     ]);
   };
 

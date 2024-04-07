@@ -1,17 +1,25 @@
-import { datasource } from '../db/datasource';
+import { DBFeed, datasource } from '../db/datasource';
 
 export const Admin = async (): Promise<string> => {
   const feeds = await datasource.getAll();
-  const renderedFeeds =
-    feeds
-      .map(
-        ({ title, url }) =>
-          `<li>
-            <a href="${url}">${title}</a>
-            <button type="submit" onclick="deleteFeed(event, \'${title}\')">X</button>
-          </li>`,
-      )
-      .join('\n') || '<li>No feeds found</li>';
+  const feedsCollection = feeds.reduce(
+    (acc: Record<string, any>, { title, url, category }: DBFeed) => {
+      if (!acc[category]) acc[category] = '';
+      acc[category] += `<li>
+          <a href="${url}">${title}</a>
+          <button type="submit" onclick="deleteFeed(event, \'${title}\')">X</button>
+        </li>\n`;
+      return acc;
+    },
+    {},
+  );
+  
+  const renderedFeeds = Object.keys(feedsCollection).map((key) => {
+    let newKey = key.substring(1, key.length);
+    const prettyKey = key[0].toUpperCase() + newKey;
+    return `<h3>${prettyKey}</h3>
+      <ul>${feedsCollection[key]}</ul>`
+  }).join('\n') || '<li>No feeds found</li>';
 
   return `<!DOCTYPE html>
   <html lang="en">
@@ -32,6 +40,12 @@ export const Admin = async (): Promise<string> => {
     <input id="titleInput" name="title" type="text" required>
     <label for="linkInput">Link</label>
     <input id="linkInput" name="link" type="text" required>
+    <label for="categoryInput">Category</label>
+    <select id="categoryInput" name="category">
+      <option value="code" selected>Code</option>
+      <option value="tech">Tech</option>
+      <option value="ocean">Ocean</option>
+    </select>
     <button type="submit" onClick="addFeed(event, title, link)">Add new feed</button>
     <p id="add-error" class="error" hidden></p>
   </form>
@@ -48,9 +62,7 @@ export const Admin = async (): Promise<string> => {
 
   <h2>Feeds</h2>
   <form id="deleteForm" action="/delete" method="post">
-    <ul>
-      ${renderedFeeds}
-    </ul>
+  ${renderedFeeds}
   </form>
 
   <script src="/js/admin.js"></script>

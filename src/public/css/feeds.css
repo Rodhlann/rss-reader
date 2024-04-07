@@ -5,6 +5,10 @@
   margin-bottom: 10px;
 }
 
+.feeds-loading {
+  margin-top: 20px;
+}
+
 .feed-post {
   display: flex;
   flex-direction: column;
