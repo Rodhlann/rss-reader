@@ -19,6 +19,7 @@ export const Admin = async (): Promise<string> => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
   </head>
 
   <h1>Admin</h1>
@@ -31,12 +32,14 @@ export const Admin = async (): Promise<string> => {
     <input id="titleInput" name="title" type="text" required>
     <label for="linkInput">Link</label>
     <input id="linkInput" name="link" type="text" required>
-    <button type="submit">Add new feed</button>
+    <button type="submit" onClick="addFeed(event, title, link)">Add new feed</button>
+    <p id="add-error" class="error" hidden></p>
   </form>
 
-  <form action="/feeds/import" method="post" enctype="multipart/form-data">
+  <form id="importFrom" action="/feeds/import" method="post" enctype="multipart/form-data">
     <input type="file" name="file">
-    <button type="submit">Import Feeds</button>
+    <button type="submit" onClick="importFeeds(event)">Import Feeds</button>
+    <p id="import-error" class="error" hidden></p>
   </form>
 
   <form action="/feeds/export">
@@ -50,6 +53,7 @@ export const Admin = async (): Promise<string> => {
     </ul>
   </form>
 
+  <script src="/js/admin.js"></script>
   <script>
     function deleteFeed(event, title) {
       event.preventDefault();

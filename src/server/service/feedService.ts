@@ -60,10 +60,16 @@ export const addFeed = async ({ title, url }: DBFeed) => {
   const trimmedTitle = title.trim();
   const trimmedUrl = url.trim();
 
-  if (!validateText(trimmedTitle))
-    throw new Error('Invalid title string provided');
-  if (!validateUrl(trimmedUrl))
-    throw new Error('Invalid URL string provided');
+  if (!validateText(trimmedTitle)) {
+    const error = 'Invalid title string provided'
+    log.error(error)
+    throw new Error(error);
+  }
+  if (!validateUrl(trimmedUrl)) {
+    const error = 'Invalid URL string provided'
+    log.error(error);
+    throw new Error(error);
+  }
 
   await datasource.add({ title: trimmedTitle, url: trimmedUrl });
 };

@@ -4,9 +4,9 @@ import multer from 'multer';
 import fs from 'node:fs';
 import path from 'path';
 import { log } from '../../util/logger';
+import { DBFeed } from '../db/datasource';
 import { addFeed, deleteFeed, getDBFeeds } from '../service/feedService';
 import { Admin } from '../template/admin';
-import { DBFeed } from '../db/datasource';
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -68,12 +68,11 @@ export const registerAdminRoutes = (app: Express): void => {
 
         log.info('Deleting temp feeds import file');
         fs.rmSync(file.path);
-      } catch (e) {
-        if (e instanceof Error)
-          log.error('Import Failed', { errorMessage: e.message });
-      } finally {
         res.redirect(302, '/admin');
-        return;
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Unknown Error';
+        log.error('Import Failed', { errorMessage: message });
+        res.status(500).send(`Unable to import feeds: ${message}`);
       }
     },
   );
@@ -88,7 +87,7 @@ export const registerAdminRoutes = (app: Express): void => {
       await addFeed({ title, url: link });
       res.send(await Admin());
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Unknown Error'
+      const message = e instanceof Error ? e.message : 'Unknown Error';
       res.status(500).send(`Unable to add feed: ${message}`);
     }
   });

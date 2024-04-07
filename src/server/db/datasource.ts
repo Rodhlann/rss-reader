@@ -36,6 +36,7 @@ class SQLDatasource implements Datasource {
         log.error('Unable to add feed', {
           errorMessage: e instanceof Error ? e.message : JSON.stringify(e),
         });
+      throw e
     }
   };
 
