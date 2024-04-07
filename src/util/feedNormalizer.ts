@@ -47,10 +47,18 @@ class RSSFeedNormalizer implements FeedNormalizer {
           link,
           pubDate,
         }: {
-          title: string;
+          title: string | Record<string, string>;
           link: string;
           pubDate: string;
-        }) => ({ title, link, pubDate }),
+        }) => {
+          let formattedTitle = title as string
+          if (typeof title === 'object') {
+            // When post titles have html tags they are converted to an object
+            // The tags seem to be placed first in the object, so the array needs reversing
+            formattedTitle = Object.values(title).reverse().join(' ')
+          }
+          return { title: formattedTitle, link, pubDate };
+        },
       );
       return {
         title: channel.title,
