@@ -15,23 +15,53 @@ export const Home = (): string => {
 
     <h2>This Week's Feeds</h2>
     <div id="feed-selector">
-      <input type="radio" id="radio-all" name="options" value="all" checked onchange="selectCategory('all')">
-      <label for="option1">All</label><br>
+      <input 
+        type="checkbox" 
+        id="checkbox-all" 
+        class="filter-checkbox-hidden"
+        name="feed-filter" 
+        value="all" 
+        checked 
+        onchange="selectCategory('all')">
+      <label class="filter-checkbox-label" for="checkbox-all">All</label><br>
 
-      <input type="radio" id="radio-code" name="options" value="code" onchange="selectCategory('code')">
-      <label for="option2">Code</label><br>
+      <input 
+        type="checkbox"
+        id="checkbox-code" 
+        class="filter-checkbox-hidden"
+        name="feed-filter"
+        value="code"
+        checked
+        onchange="selectCategory('code')">
+      <label class="filter-checkbox-label" for="checkbox-code">Code</label><br>
 
-      <input type="radio" id="radio-tech" name="options" value="tech" onchange="selectCategory('tech')">
-      <label for="option3">Tech</label><br>
+      <input 
+        type="checkbox"
+        id="checkbox-tech"
+        class="filter-checkbox-hidden"
+        name="feed-filter"
+        value="tech"
+        checked
+        onchange="selectCategory('tech')">
+      <label class="filter-checkbox-label" for="checkbox-tech">Tech</label><br>
 
-      <input type="radio" id="radio-ocean" name="options" value="ocean" onchange="selectCategory('ocean')">
-      <label for="option3">Ocean</label><br>
+      <input 
+        type="checkbox"
+        id="checkbox-ocean" 
+        class="filter-checkbox-hidden"
+        name="feed-filter"
+        value="ocean"
+        checked
+        onchange="selectCategory('ocean')">
+      <label class="filter-checkbox-label" for="checkbox-ocean">Ocean</label><br>
     </div>
     <div id="feeds-wrapper">
       <div class="feeds-loading">Loading...</div>
     </div>
   </div>
 
+  <script src="js/state.js"></script>
+  <script src="js/filterCategories.js"></script>
   <script src="js/fetchFeeds.js"></script>
   </body>
   </html>`;

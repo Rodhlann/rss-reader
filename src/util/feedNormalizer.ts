@@ -1,6 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { log } from './logger';
-import { Feed } from './types';
+import { Category, Feed } from './types';
 
 type RssFeed = {
   rss: {
@@ -27,7 +27,7 @@ type AtomFeed = {
 };
 
 interface FeedNormalizer {
-  normalize(dbTitle: string): Feed | undefined;
+  normalize(dbTitle: string, dbCategory: Category): Feed | undefined;
 }
 
 class RSSFeedNormalizer implements FeedNormalizer {
@@ -37,7 +37,7 @@ class RSSFeedNormalizer implements FeedNormalizer {
     this.parsedXml = parsedXml;
   }
 
-  normalize(dbTitle: string): Feed | undefined {
+  normalize(dbTitle: string, dbCategory: Category): Feed | undefined {
     try {
       const channel = this.parsedXml.rss.channel;
       const items = channel.item;
@@ -63,6 +63,7 @@ class RSSFeedNormalizer implements FeedNormalizer {
       return {
         title: dbTitle,
         posts,
+        category: dbCategory
       };
     } catch (e) {
       if (e instanceof Error)
@@ -78,7 +79,7 @@ class AtomFeedNormalizer implements FeedNormalizer {
     this.parsedXml = parsedXml;
   }
 
-  normalize(dbTitle: string): Feed | undefined {
+  normalize(dbTitle: string, dbCategory: Category): Feed | undefined {
     try {
       const feed = this.parsedXml.feed;
       const entries = feed.entry;
@@ -92,6 +93,7 @@ class AtomFeedNormalizer implements FeedNormalizer {
       return {
         title: dbTitle,
         posts,
+        category: dbCategory
       };
     } catch (e) {
       if (e instanceof Error)
@@ -111,12 +113,11 @@ export class NormalizerFactory {
     } else if (xmlString.includes('</feed>')) {
       this.normalizer = new AtomFeedNormalizer(parser.parse(xmlString));
     } else {
-      console.log(xmlString);
-      log.error('Unknown feed format');
+      log.error('Unknown feed format', xmlString.substring(0, 250) + '...');
     }
   }
 
-  normalize(dbTitle: string) {
-    return this.normalizer?.normalize(dbTitle);
+  normalize(dbTitle: string, dbCategory: Category) {
+    return this.normalizer?.normalize(dbTitle, dbCategory);
   }
 }

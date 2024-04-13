@@ -16,9 +16,20 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
   log.info('Fetching feed data');
   const feeds = await datasource.getAll();
 
-  const promises = feeds.map(({ url }) => fetch(url));
-  const resolved = await Promise.all(promises);
+  let resolved;
+  try {
+    const promises = feeds.map(({ url }) => fetch(url));
+    resolved = await Promise.all(promises);
+  } catch(e) {
+    const message = e instanceof Error ? e.message : 'Unknown Error';
+    log.error('Unable to fetch feed data', { errorMessage: message });
+  }
 
+  if (!resolved) {
+    log.warn('No feeds fetched');
+    return []
+  };
+  
   const parsedFeeds = (
     await Promise.all(
       resolved.map(async (res, idx) => {
@@ -41,7 +52,7 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
         }
 
         const normalizer = new NormalizerFactory(xmlString);
-        return normalizer.normalize(feeds[idx].title);
+        return normalizer.normalize(feeds[idx].title, feeds[idx].category);
       }),
     )
   ).filter(Boolean) as Feed[];
@@ -51,7 +62,7 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
 };
 
 export const getDBFeeds = async (): Promise<DBFeed[]> => {
-  log.info('Fetching feed data');
+  log.info('Fetching DB feed data');
   return await datasource.getAll();
 };
 

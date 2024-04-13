@@ -1,10 +1,11 @@
 import config from '../../config/config';
 import { log } from '../../util/logger';
+import { Category } from '../../util/types';
 import { cacheReset } from './cache';
 import { PostgresDatasource } from './postgres';
 import { SqliteDatasource } from './sqlite';
 
-export type DBFeed = { title: string; url: string, category: string };
+export type DBFeed = { title: string; url: string, category: Category };
 
 export interface Datasource {
   add({ title, url, category }: DBFeed): Promise<void>;

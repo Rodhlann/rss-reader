@@ -1,29 +1,9 @@
-const STATE = {
-  defaultVisiblePostsCount: 3,
-  fetchFeedsLoading: false,
-  fetchFeedsError: false,
-};
-
-const selectCategory = (input) => {
-  switch (input) {
-    case 'code':
-      console.log('code');
-      break;
-    case 'tech':
-      break;
-    case 'ocean':
-      break;
-    case 'all':
-    default:
-  }
-};
-
 // Spaces and periods become dashes
 const kebabCase = (string) => string.toLowerCase().replaceAll(/[ .]/g, '-');
 
 const toggleFeed = (title) => {
   const formattedTitle = kebabCase(title);
-  const recentPosts = STATE[`${kebabCase(title)}-posts`];
+  const recentPosts = STATE[`${kebabCase(title)}-feed`]?.posts || [];
   const canCollapse = recentPosts.length > STATE.defaultVisiblePostsCount;
   const isCollapsed = STATE[`${kebabCase(title)}-collapsed`];
   STATE[`${kebabCase(title)}-collapsed`] = !isCollapsed;
@@ -36,14 +16,26 @@ const toggleFeed = (title) => {
   feedPostWrapper.innerHTML = postHtml;
 };
 
-const filterRecentPosts = (posts) => {
-  const currentDate = new Date();
-  const lastWeekTimestamp = currentDate.setUTCDate(new Date().getUTCDate() - 7);
+const redrawFeeds = () => {
+  const feedsWrapper = document.getElementById('feeds-wrapper');
 
-  return posts.filter(
-    ({ pubDate }) => new Date(pubDate).getTime() > lastWeekTimestamp,
-  );
-};
+  const feeds = Object.keys(STATE)
+    .filter((key) => key.includes('feed'))
+    .map((key) => STATE[`${kebabCase(key)}`]);
+
+  const htmlFeeds = feeds
+    .filter(filterCategories)
+    .map(createFeed)
+    .filter(Boolean)
+    .join('');
+
+  if (!htmlFeeds?.length) {
+    feedsWrapper.innerHTML = '<div class="empty-feeds">No Feeds Found</div>';
+    return;
+  }
+
+  feedsWrapper.innerHTML = htmlFeeds;
+}
 
 const createPosts = (title, posts) => {
   const isCollapsed = STATE[`${kebabCase(title)}-collapsed`];
@@ -76,11 +68,28 @@ const renderPosts = (title, htmlPosts, canCollapse, isCollapsed) => `
       : ''
   }`;
 
-const createFeed = ({ title, posts }) => {
-  const recentPosts = filterRecentPosts(posts);
+const filterRecentPosts = ({ title, posts, category }) => {
+  const currentDate = new Date();
+  const lastWeekTimestamp = currentDate.setUTCDate(new Date().getUTCDate() - 7);
 
+  const recentPosts = posts.filter(
+    ({ pubDate }) => new Date(pubDate).getTime() > lastWeekTimestamp,
+  );
+
+  return {
+    title,
+    posts: recentPosts,
+    category
+  };
+};
+
+const filterCategories = ({ category }) => STATE.showCategories[category]
+
+const createFeed = ({ title, posts: recentPosts, category }) => {
   if (!recentPosts.length) return;
-  STATE[`${kebabCase(title)}-posts`] = recentPosts;
+  if (!STATE.showCategories[category]) return;
+  
+  STATE[`${kebabCase(title)}-feed`] = { title, posts: recentPosts, category};
   const canCollapse = recentPosts.length > STATE.defaultVisiblePostsCount;
   const isCollapsed = STATE[`${kebabCase(title)}-collapsed`];
 
@@ -106,7 +115,8 @@ const populateFeeds = (feeds) => {
   feeds.forEach(({ title }) => (STATE[`${kebabCase(title)}-collapsed`] = true));
 
   const htmlFeeds = feeds
-    .map((feed) => createFeed(feed))
+    .map(filterRecentPosts)
+    .map(createFeed)
     .filter(Boolean)
     .join('');
 
