@@ -1,44 +1,25 @@
-const checkboxAll = document.getElementById('checkbox-all');
-const checkboxCode = document.getElementById('checkbox-code');
-const checkboxTech = document.getElementById('checkbox-tech');
-const checkboxOcean = document.getElementById('checkbox-ocean');
-const checkboxes = [checkboxAll, checkboxCode, checkboxTech, checkboxOcean];
-
 const selectCategory = (input) => {
-  switch (input) {
-    case 'code': {
-      STATE.showCategories.code = checkboxCode.checked
-      if (!checkboxCode.checked)
-        checkboxAll.checked = false
-      break;
-    }
-    case 'tech':
-      STATE.showCategories.tech = checkboxTech.checked
-      if (!checkboxTech.checked)
-        checkboxAll.checked = false
-      break;
-    case 'ocean':
-      STATE.showCategories.ocean = checkboxOcean.checked
-      if (!checkboxOcean.checked)
-        checkboxAll.checked = false
-      break;
-    case 'all':
-    default: {
-      checkboxes.forEach((el) => {
-        el.checked = checkboxAll.checked;
-      });
-      Object.keys(STATE.showCategories).forEach((key) => {
-        STATE.showCategories[key] = checkboxAll.checked;
-      })
-    }
-  }
-  
-  const allChecked = checkboxes.slice(1, checkboxes.length).every((checkbox) => checkbox.checked);
-  if (allChecked) {
-    checkboxAll.checked = true;
+  if (input === 'all') {
+    document.getElementById('checkbox-all').checked = true;
+  } else {
+    document.getElementById('checkbox-all').checked = false;
   }
 
-  console.log(STATE.showCategories);
+  Object.keys(STATE.showCategories).forEach((key) => {
+    if (input === 'all') {
+      STATE.showCategories[key] = true
+      document.getElementById(`checkbox-${key}`).checked = false;
+    } else {
+      document.getElementById(`checkbox-${key}`).checked = (key === input);
+      STATE.showCategories[key] = (key === input)
+    }
+  })
 
   redrawFeeds();
 };
+
+const handleKeyPress = (event, input) => {
+  if (event.key === 'Enter') {
+    selectCategory(input);
+  }
+}
