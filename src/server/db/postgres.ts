@@ -19,20 +19,30 @@ export class PostgresDatasource implements Datasource {
     this.db
       .connect()
       .then(() => {
-        this.db.query('DROP TYPE IF EXISTS category_enum;');
-        this.db.query(
-          `CREATE TYPE category_enum AS ENUM ('code', 'tech', 'ocean');`,
-        );
-        this.db
-          .query(
-            `CREATE TABLE IF NOT EXISTS rss_feeds (
-          id SERIAL PRIMARY KEY,
-          title TEXT NOT NULL UNIQUE,
-          url TEXT NOT NULL UNIQUE,
-          category category_enum NOT NULL
-        );`,
-          )
-          .then(() => {
+        this.db.query(`DO $$
+        BEGIN
+          IF NOT EXISTS (
+             SELECT 1
+             FROM   information_schema.tables 
+             WHERE  table_schema = 'public'
+             AND    table_name = 'rss_feeds'
+          ) THEN
+            IF EXISTS (
+              SELECT 1
+              FROM  pg_type
+              WHERE typename = 'category_enum'
+            ) THEN
+              EXECUTE 'DROP TYPE category_enum';
+            END IF;
+            CREATE TYPE category_enum AS ENUM ('code', 'tech', 'ocean');
+            CREATE TABLE rss_feeds (
+              id SERIAL PRIMARY KEY,
+              title TEXT NOT NULL UNIQUE,
+              url TEXT NOT NULL UNIQUE,
+              category category_enum NOT NULL
+            );
+          END IF;
+        END $$;`).then(() => {
             log.info('Postgres DB initialized');
           })
           .catch((e: Error) => {
