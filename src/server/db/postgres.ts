@@ -24,7 +24,7 @@ export class PostgresDatasource implements Datasource {
             `CREATE TABLE IF NOT EXISTS rss_feeds (
           id SERIAL PRIMARY KEY,
           title TEXT NOT NULL UNIQUE,
-          url TEXT NOT NULL UNIQUE
+          url TEXT NOT NULL UNIQUE,
           category ENUM('code', 'tech', 'ocean') NOT NULL
         )`,
           )
