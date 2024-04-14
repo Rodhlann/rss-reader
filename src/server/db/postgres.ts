@@ -19,7 +19,10 @@ export class PostgresDatasource implements Datasource {
     this.db
       .connect()
       .then(() => {
-        this.db.query(`CREATE TYPE category_enum AS ENUM ('code', 'tech', 'ocean');`)
+        this.db.query('DROP TYPE IF EXISTS category_enum;');
+        this.db.query(
+          `CREATE TYPE category_enum AS ENUM ('code', 'tech', 'ocean');`,
+        );
         this.db
           .query(
             `CREATE TABLE IF NOT EXISTS rss_feeds (
@@ -44,11 +47,10 @@ export class PostgresDatasource implements Datasource {
   }
 
   add = async ({ title, url, category }: DBFeed): Promise<void> => {
-    await this.db.query(`INSERT INTO rss_feeds (title, url, category) VALUES ($1, $2, $3)`, [
-      title,
-      url,
-      category
-    ]);
+    await this.db.query(
+      `INSERT INTO rss_feeds (title, url, category) VALUES ($1, $2, $3)`,
+      [title, url, category],
+    );
   };
 
   getAll = async (): Promise<DBFeed[]> => {
