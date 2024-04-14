@@ -19,14 +19,15 @@ export class PostgresDatasource implements Datasource {
     this.db
       .connect()
       .then(() => {
+        this.db.query(`CREATE TYPE category_enum AS ENUM ('code', 'tech', 'ocean');`)
         this.db
           .query(
             `CREATE TABLE IF NOT EXISTS rss_feeds (
           id SERIAL PRIMARY KEY,
           title TEXT NOT NULL UNIQUE,
           url TEXT NOT NULL UNIQUE,
-          category ENUM('code', 'tech', 'ocean') NOT NULL
-        )`,
+          category category_enum NOT NULL
+        );`,
           )
           .then(() => {
             log.info('Postgres DB initialized');
