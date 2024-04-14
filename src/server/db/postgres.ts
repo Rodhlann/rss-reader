@@ -30,7 +30,7 @@ export class PostgresDatasource implements Datasource {
             IF EXISTS (
               SELECT 1
               FROM  pg_type
-              WHERE typename = 'category_enum'
+              WHERE typname = 'category_enum'
             ) THEN
               EXECUTE 'DROP TYPE category_enum';
             END IF;
