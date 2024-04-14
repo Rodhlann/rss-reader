@@ -46,10 +46,14 @@
 
 .filter-checkbox-hidden + .filter-checkbox-label:hover {
   box-shadow:
+    /* top */
     inset 0 5px 7px -5px rgba(0, 0, 0, 0.5),
-    /* top */ inset 0 -2px 2px -2px rgba(0, 0, 0, 0.5),
-    /* bottom */ inset 2px 0 2px -2px rgba(0, 0, 0, 0.5),
-    /* left */ inset -2px 0 2px -2px rgba(0, 0, 0, 0.5); /* right */
+    /* bottom */ 
+    inset 0 -2px 2px -2px rgba(0, 0, 0, 0.5),
+    /* left */ 
+    inset 2px 0 2px -2px rgba(0, 0, 0, 0.5),
+    /* right */ 
+    inset -2px 0 2px -2px rgba(0, 0, 0, 0.5);
   text-decoration: underline;
 }
 
@@ -67,4 +71,11 @@
   border-right: 1px solid gray;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
+}
+
+@media (max-width: 750px) {
+  .filter-checkbox-label {
+    text-align: center;
+    width: 25%;
+  }
 }
