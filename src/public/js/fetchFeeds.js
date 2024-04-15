@@ -72,7 +72,7 @@ const filterRecentPosts = ({ title, posts, category }) => {
   const currentDate = new Date();
   const lastWeekTimestamp = currentDate.setUTCDate(new Date().getUTCDate() - 7);
 
-  const recentPosts = posts.filter(
+  const recentPosts = posts?.filter(
     ({ pubDate }) => new Date(pubDate).getTime() > lastWeekTimestamp,
   );
 
@@ -86,7 +86,7 @@ const filterRecentPosts = ({ title, posts, category }) => {
 const filterCategories = ({ category }) => STATE.showCategories[category]
 
 const createFeed = ({ title, posts: recentPosts, category }) => {
-  if (!recentPosts.length) return;
+  if (!recentPosts?.length) return;
   if (!STATE.showCategories[category]) return;
   
   STATE[`${kebabCase(title)}-feed`] = { title, posts: recentPosts, category};

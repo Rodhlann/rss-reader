@@ -41,7 +41,7 @@ class RSSFeedNormalizer implements FeedNormalizer {
     try {
       const channel = this.parsedXml.rss.channel;
       const items = channel.item;
-      const posts = items.map(
+      const posts = items?.map(
         ({
           title,
           link,
@@ -51,11 +51,11 @@ class RSSFeedNormalizer implements FeedNormalizer {
           link: string;
           pubDate: string;
         }) => {
-          let formattedTitle = title as string
+          let formattedTitle = title as string;
           if (typeof title === 'object') {
             // When post titles have html tags they are converted to an object
             // The tags seem to be placed first in the object, so the array needs reversing
-            formattedTitle = Object.values(title).reverse().join(' ')
+            formattedTitle = Object.values(title).reverse().join(' ');
           }
           return { title: formattedTitle, link, pubDate };
         },
@@ -63,11 +63,11 @@ class RSSFeedNormalizer implements FeedNormalizer {
       return {
         title: dbTitle,
         posts,
-        category: dbCategory
+        category: dbCategory,
       };
     } catch (e) {
       if (e instanceof Error)
-        log.error('Unable to parse RSS feed XML', { errorMessage: e.message });
+        log.error('Unable to parse RSS feed XML', { title: dbTitle, errorMessage: e.message });
     }
   }
 }
@@ -93,7 +93,7 @@ class AtomFeedNormalizer implements FeedNormalizer {
       return {
         title: dbTitle,
         posts,
-        category: dbCategory
+        category: dbCategory,
       };
     } catch (e) {
       if (e instanceof Error)
@@ -104,8 +104,15 @@ class AtomFeedNormalizer implements FeedNormalizer {
 
 export class NormalizerFactory {
   normalizer: FeedNormalizer | undefined;
+  title: string;
+  url: string;
+  category: Category;
 
-  constructor(xmlString: string) {
+  constructor(title: string, url: string, category: Category, xmlString: string) {
+    this.title = title;
+    this.url = url;
+    this.category = category;
+
     const parser = new XMLParser();
 
     if (xmlString.includes('</rss>')) {
@@ -113,11 +120,15 @@ export class NormalizerFactory {
     } else if (xmlString.includes('</feed>')) {
       this.normalizer = new AtomFeedNormalizer(parser.parse(xmlString));
     } else {
-      log.error('Unknown feed format', xmlString.substring(0, 250) + '...');
+      log.error('Unknown feed format', {
+        feed: this.title,
+        url: this.url,
+        xmlString: xmlString.substring(0, 250) + '...',
+      });
     }
   }
 
-  normalize(dbTitle: string, dbCategory: Category) {
-    return this.normalizer?.normalize(dbTitle, dbCategory);
+  normalize() {
+    return this.normalizer?.normalize(this.title, this.category);
   }
 }

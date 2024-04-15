@@ -50,9 +50,15 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
         } finally {
           reader.releaseLock();
         }
-
-        const normalizer = new NormalizerFactory(xmlString);
-        return normalizer.normalize(feeds[idx].title, feeds[idx].category);
+        
+        const {title, url, category} = feeds[idx];
+        const normalizer = new NormalizerFactory(
+          title,
+          url,
+          category, 
+          xmlString
+        );
+        return normalizer.normalize();
       }),
     )
   ).filter(Boolean) as Feed[];
