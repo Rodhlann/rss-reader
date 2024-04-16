@@ -16,23 +16,34 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
   log.info('Fetching feed data');
   const feeds = await datasource.getAll();
 
-  let resolved;
-  try {
-    const promises = feeds.map(({ url }) => fetch(url));
-    resolved = await Promise.all(promises);
-  } catch(e) {
-    const message = e instanceof Error ? e.message : 'Unknown Error';
-    log.error('Unable to fetch feed data', { errorMessage: message });
+  const promises = feeds.map(({ url }) => fetch(url));
+
+  const resolved = await Promise.allSettled(promises);
+
+  // Rejected promises will still return undefined entries in map result
+  // This is important for feed indexing on line 64
+  const resolvedFeeds = resolved.map(({ status, ...rest }, idx) => {
+    if (status === 'fulfilled') {
+      // @ts-ignore
+      return rest.value;
+    } else {
+      const { title, url } = feeds[idx];
+      // @ts-ignore
+      log.error("Failed to fetch feed data", { feed: title, url, errorMessage: rest.reason?.message })
+    }
+  });
+
+  if (!resolvedFeeds) {
+    log.warn('No feeds fetched');
+    return [];
   }
 
-  if (!resolved) {
-    log.warn('No feeds fetched');
-    return []
-  };
-  
   const parsedFeeds = (
     await Promise.all(
-      resolved.map(async (res, idx) => {
+      resolvedFeeds.map(async (res, idx) => {
+        // In the event that a fetch promise rejects, res will be undefined
+        if (!res) return;
+
         const reader = res.body?.getReader();
         const decoder = new TextDecoder('utf-8');
         if (!reader) return;
@@ -50,13 +61,14 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
         } finally {
           reader.releaseLock();
         }
-        
-        const {title, url, category} = feeds[idx];
+
+        const { title, url, category } = feeds[idx];
+
         const normalizer = new NormalizerFactory(
           title,
           url,
-          category, 
-          xmlString
+          category,
+          xmlString,
         );
         return normalizer.normalize();
       }),
@@ -78,12 +90,12 @@ export const addFeed = async ({ title, url, category }: DBFeed) => {
   const trimmedUrl = url.trim();
 
   if (!validateText(trimmedTitle)) {
-    const error = 'Invalid title string provided'
-    log.error(error)
+    const error = 'Invalid title string provided';
+    log.error(error);
     throw new Error(error);
   }
   if (!validateUrl(trimmedUrl)) {
-    const error = 'Invalid URL string provided'
+    const error = 'Invalid URL string provided';
     log.error(error);
     throw new Error(error);
   }
