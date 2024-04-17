@@ -83,7 +83,7 @@ class AtomFeedNormalizer implements FeedNormalizer {
     try {
       const feed = this.parsedXml.feed;
       const entries = feed.entry;
-      const posts = entries.map(
+      const posts = entries?.map(
         ({ title, id, published }: AtomFeed['feed']['entry'][0]) => ({
           title,
           link: id,
@@ -97,7 +97,7 @@ class AtomFeedNormalizer implements FeedNormalizer {
       };
     } catch (e) {
       if (e instanceof Error)
-        log.error('Unable to parse Atom feed XML', { errorMessage: e.message });
+        log.error('Unable to parse Atom feed XML', { title: dbTitle, errorMessage: e.message });
     }
   }
 }
