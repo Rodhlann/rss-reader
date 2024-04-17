@@ -5,8 +5,67 @@ import { validateText, validateUrl } from '../../util/validate';
 import { cacheFeeds, getCachedFeeds } from '../db/cache';
 import { DBFeed, datasource } from '../db/datasource';
 
+type RawFeedData = {
+  feed: DBFeed;
+  readableStream: ReadableStream<Uint8Array> | null;
+} | null;
+
+const parseXml = async (data: RawFeedData): Promise<Feed | undefined> => {
+  if (!data?.readableStream) return;
+  const { feed, readableStream } = data;
+
+  const reader = readableStream.getReader();
+  const decoder = new TextDecoder('utf-8');
+  if (!reader) return;
+  let xmlString = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      // Process the value (Uint8Array) read from the stream
+      xmlString += decoder.decode(value);
+    }
+  } catch (e) {
+    if (e instanceof Error) log.error(e.message);
+  } finally {
+    reader.releaseLock();
+  }
+
+  const { title, url, category } = feed;
+
+  const normalizer = new NormalizerFactory(title, url, category, xmlString);
+  return normalizer.normalize();
+};
+
+const fetchFeed = async (
+  feed: DBFeed,
+  count: number = 0,
+): Promise<RawFeedData> => {
+  return fetch(feed.url)
+    .then(async (res) => {
+      return { feed, readableStream: res.body };
+    })
+    .catch(async (err) => {
+      if (count < 5) {
+        await new Promise(resolve => setTimeout(resolve, 200))
+        log.info('Retrying feed fetch', {
+          title: feed.title,
+          retry: (count + 1).toString(),
+        });
+        return await fetchFeed(feed, count + 1);
+      } else {
+        log.error('Unable to fetch feed', {
+          title: feed.title,
+          errorMessage: err.message,
+        });
+        return null;
+      }
+    });
+};
+
 export const fetchFeeds = async (): Promise<Feed[]> => {
-  const cachedFeeds = await getCachedFeeds();
+  const cachedFeeds: Feed[] | null = await getCachedFeeds();
   if (cachedFeeds?.length) {
     log.info('Resolving cached feeds');
     return cachedFeeds;
@@ -14,66 +73,19 @@ export const fetchFeeds = async (): Promise<Feed[]> => {
   log.info('No cached feeds found');
 
   log.info('Fetching feed data');
-  const feeds = await datasource.getAll();
+  const feeds: DBFeed[] = await datasource.getAll();
+  const resolved: RawFeedData[] = await Promise.all(
+    feeds.map(async (feed) => fetchFeed(feed)),
+  );
 
-  const promises = feeds.map(({ url }) => fetch(url));
-
-  const resolved = await Promise.allSettled(promises);
-
-  // Rejected promises will still return undefined entries in map result
-  // This is important for feed indexing on line 64
-  const resolvedFeeds = resolved.map(({ status, ...rest }, idx) => {
-    if (status === 'fulfilled') {
-      // @ts-ignore
-      return rest.value;
-    } else {
-      const { title, url } = feeds[idx];
-      // @ts-ignore
-      log.error("Failed to fetch feed data", { feed: title, url, errorMessage: rest.reason?.message })
-    }
-  });
-
-  if (!resolvedFeeds) {
+  if (!resolved) {
     log.warn('No feeds fetched');
     return [];
   }
 
-  const parsedFeeds = (
-    await Promise.all(
-      resolvedFeeds.map(async (res, idx) => {
-        // In the event that a fetch promise rejects, res will be undefined
-        if (!res) return;
-
-        const reader = res.body?.getReader();
-        const decoder = new TextDecoder('utf-8');
-        if (!reader) return;
-        let xmlString = '';
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            // Process the value (Uint8Array) read from the stream
-            xmlString += decoder.decode(value);
-          }
-        } catch (e) {
-          if (e instanceof Error) log.error(e.message);
-        } finally {
-          reader.releaseLock();
-        }
-
-        const { title, url, category } = feeds[idx];
-
-        const normalizer = new NormalizerFactory(
-          title,
-          url,
-          category,
-          xmlString,
-        );
-        return normalizer.normalize();
-      }),
-    )
-  ).filter(Boolean) as Feed[];
+  const parsedFeeds: Feed[] = (
+    await Promise.all(resolved.map((res) => parseXml(res)))
+  ).filter((feed): feed is Feed => !!feed);
 
   cacheFeeds(parsedFeeds);
   return parsedFeeds;
