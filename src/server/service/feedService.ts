@@ -1,3 +1,4 @@
+import config from '../../config/config';
 import { NormalizerFactory } from '../../util/feedNormalizer';
 import { log } from '../../util/logger';
 import { Feed } from '../../util/types';
@@ -47,11 +48,11 @@ const fetchFeed = async (
       return { feed, readableStream: res.body };
     })
     .catch(async (err) => {
-      if (count < 5) {
+      if (count < config.feedFetchRetryCount) {
         await new Promise(resolve => setTimeout(resolve, 200))
         log.info('Retrying feed fetch', {
           title: feed.title,
-          retry: (count + 1).toString(),
+          retry: `${count + 1} of ${config.feedFetchRetryCount}`,
         });
         return await fetchFeed(feed, count + 1);
       } else {

@@ -23,6 +23,7 @@ const issuerBaseURL = process.env.ISSUER_URL;
 
 export default {
   port,
+  feedFetchRetryCount: 5,
   dbms,
   auth: {
     authRequired: false,
