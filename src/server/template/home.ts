@@ -59,64 +59,6 @@ export const Home = (): string => {
     <a href="/admin">Admin Login</a>
 
     <h2>This Week's Feeds</h2>
-    <div id="feed-selector">
-      <input 
-        type="checkbox" 
-        id="checkbox-all" 
-        class="filter-checkbox-hidden"
-        name="feed-filter" 
-        value="all" 
-        checked 
-        onchange="selectCategory('all')">
-      <label 
-        class="filter-checkbox-label" 
-        for="checkbox-all" 
-        tabindex="0"
-        onkeypress="handleKeyPress(event, 'all')"
-      >All</label>
-
-      <input 
-        type="checkbox"
-        id="checkbox-code" 
-        class="filter-checkbox-hidden"
-        name="feed-filter"
-        value="code"
-        onchange="selectCategory('code')">
-      <label 
-        class="filter-checkbox-label" 
-        for="checkbox-code" 
-        tabindex="0"
-        onkeypress="handleKeyPress(event, 'code')"
-      >Code</label>
-
-      <input 
-        type="checkbox"
-        id="checkbox-tech"
-        class="filter-checkbox-hidden"
-        name="feed-filter"
-        value="tech"
-        onchange="selectCategory('tech')">
-      <label 
-        class="filter-checkbox-label" 
-        for="checkbox-tech" 
-        tabindex="0"
-        onkeypress="handleKeyPress(event, 'tech')"
-      >Tech</label>
-
-      <input 
-        type="checkbox"
-        id="checkbox-ocean" 
-        class="filter-checkbox-hidden"
-        name="feed-filter"
-        value="ocean"
-        onchange="selectCategory('ocean')">
-      <label 
-        class="filter-checkbox-label" 
-        for="checkbox-ocean" 
-        tabindex="0"
-        onkeypress="handleKeyPress(event, 'ocean')"
-      >Ocean</label>
-    </div>
     <div id="feeds-wrapper">
       <div class="feeds-loading">Loading...</div>
     </div>
