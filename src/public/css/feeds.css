@@ -24,7 +24,7 @@
 }
 
 #feed-selector {
-  display: flex;
+  display: none;
 }
 
 .filter-checkbox-hidden {

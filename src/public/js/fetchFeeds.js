@@ -1,65 +1,6 @@
 // Spaces and periods become dashes
 const kebabCase = (string) => string.toLowerCase().replaceAll(/[ .]/g, '-');
 
-const feedSelector = `<div id="feed-selector">
-<input 
-  type="checkbox" 
-  id="checkbox-all" 
-  class="filter-checkbox-hidden"
-  name="feed-filter" 
-  value="all" 
-  checked 
-  onchange="selectCategory('all')">
-<label 
-  class="filter-checkbox-label" 
-  for="checkbox-all" 
-  tabindex="0"
-  onkeypress="handleKeyPress(event, 'all')"
->All</label>
-
-<input 
-  type="checkbox"
-  id="checkbox-code" 
-  class="filter-checkbox-hidden"
-  name="feed-filter"
-  value="code"
-  onchange="selectCategory('code')">
-<label 
-  class="filter-checkbox-label" 
-  for="checkbox-code" 
-  tabindex="0"
-  onkeypress="handleKeyPress(event, 'code')"
->Code</label>
-
-<input 
-  type="checkbox"
-  id="checkbox-tech"
-  class="filter-checkbox-hidden"
-  name="feed-filter"
-  value="tech"
-  onchange="selectCategory('tech')">
-<label 
-  class="filter-checkbox-label" 
-  for="checkbox-tech" 
-  tabindex="0"
-  onkeypress="handleKeyPress(event, 'tech')"
->Tech</label>
-
-<input 
-  type="checkbox"
-  id="checkbox-ocean" 
-  class="filter-checkbox-hidden"
-  name="feed-filter"
-  value="ocean"
-  onchange="selectCategory('ocean')">
-<label 
-  class="filter-checkbox-label" 
-  for="checkbox-ocean" 
-  tabindex="0"
-  onkeypress="handleKeyPress(event, 'ocean')"
->Ocean</label>
-</div>`
-
 const toggleFeed = (title) => {
   const formattedTitle = kebabCase(title);
   const recentPosts = STATE[`${kebabCase(title)}-feed`]?.posts || [];
@@ -93,7 +34,7 @@ const redrawFeeds = () => {
     return;
   }
 
-  feedsWrapper.innerHTML = feedSelector + htmlFeeds;
+  feedsWrapper.innerHTML = htmlFeeds;
 }
 
 const createPosts = (title, posts) => {
@@ -179,7 +120,8 @@ const populateFeeds = (feeds) => {
     .filter(Boolean)
     .join('');
 
-  feedsWrapper.innerHTML = feedSelector + htmlFeeds;
+  feedsWrapper.innerHTML = htmlFeeds;
+  document.getElementById("feed-selector").style.display = "flex";
 };
 
 const fetchFeeds = async () => {
