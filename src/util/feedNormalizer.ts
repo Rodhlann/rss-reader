@@ -115,9 +115,9 @@ export class NormalizerFactory {
 
     const parser = new XMLParser();
 
-    if (xmlString.includes('</rss>')) {
+    if (xmlString.includes('<rss')) {
       this.normalizer = new RSSFeedNormalizer(parser.parse(xmlString));
-    } else if (xmlString.includes('</feed>')) {
+    } else if (xmlString.includes('<feed')) {
       this.normalizer = new AtomFeedNormalizer(parser.parse(xmlString));
     } else {
       log.error('Unknown feed format', {
