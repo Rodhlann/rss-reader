@@ -67,7 +67,10 @@ class RSSFeedNormalizer implements FeedNormalizer {
       };
     } catch (e) {
       if (e instanceof Error)
-        log.error('Unable to parse RSS feed XML', { title: dbTitle, errorMessage: e.message });
+        log.error('Unable to parse RSS feed XML', {
+          title: dbTitle,
+          errorMessage: e.message,
+        });
     }
   }
 }
@@ -97,7 +100,10 @@ class AtomFeedNormalizer implements FeedNormalizer {
       };
     } catch (e) {
       if (e instanceof Error)
-        log.error('Unable to parse Atom feed XML', { title: dbTitle, errorMessage: e.message });
+        log.error('Unable to parse Atom feed XML', {
+          title: dbTitle,
+          errorMessage: e.message,
+        });
     }
   }
 }
@@ -108,7 +114,12 @@ export class NormalizerFactory {
   url: string;
   category: Category;
 
-  constructor(title: string, url: string, category: Category, xmlString: string) {
+  constructor(
+    title: string,
+    url: string,
+    category: Category,
+    xmlString: string,
+  ) {
     this.title = title;
     this.url = url;
     this.category = category;

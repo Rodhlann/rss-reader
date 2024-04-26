@@ -35,8 +35,13 @@ const parseXml = async (data: RawFeedData): Promise<Feed | undefined> => {
 
   const { title, url, category } = feed;
 
-  const normalizer = new NormalizerFactory(title, url, category, xmlString);
-  return normalizer.normalize();
+  try {
+    const normalizer = new NormalizerFactory(title, url, category, xmlString);
+    return normalizer.normalize();
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Unknown Error';
+    log.error('Unable to normalize feed', { title, url, errorMessage: message })
+  }
 };
 
 const fetchFeed = async (
